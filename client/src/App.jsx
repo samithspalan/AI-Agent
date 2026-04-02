@@ -1,157 +1,81 @@
-import { useEffect, useState } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, NavLink } from 'react-router-dom';
+import Dashboard from './components/Dashboard';
+import LogDetail from './components/LogDetail';
+import { LayoutGrid, Github } from 'lucide-react';
 import './App.css';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('agent');
-  const [testMessage, setTestMessage] = useState('');
-  const [agentInput, setAgentInput] = useState('');
-  const [agentReply, setAgentReply] = useState('');
-  const [issueInput, setIssueInput] = useState('');
-  const [prData, setPrData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetch('http://localhost:5000/api/test')
-      .then((res) => res.json())
-      .then((data) => setTestMessage(data.message))
-      .catch(() => setError('Failed to connect to backend. Check your terminal.'));
-  }, []);
-
-  const handleAskAgent = async (e) => {
-    e.preventDefault();
-    if (!agentInput.trim()) return;
-    setLoading(true);
-    setAgentReply('');
-    setError(null);
-
-    try {
-      const resp = await fetch('http://localhost:5000/api/agent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: agentInput }),
-      });
-      const data = await resp.json();
-      setAgentReply(data.reply);
-    } catch (err) {
-      setError('Agent failed to respond.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGeneratePR = async (e) => {
-    e.preventDefault();
-    if (!issueInput.trim()) return;
-    setLoading(true);
-    setPrData(null);
-    setError(null);
-
-    try {
-      const resp = await fetch('http://localhost:5000/api/issue', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ issue: issueInput }),
-      });
-      const data = await resp.json();
-      
-      if (data.error) throw new Error(data.details || data.error);
-      setPrData(data);
-    } catch (err) {
-      setError(err.message || 'PR generation failed.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="container">
-      <div className="tabs">
-        <div 
-          className={`tab ${activeTab === 'agent' ? 'active' : ''}`}
-          onClick={() => setActiveTab('agent')}
-        >
-          Inventory Chat
-        </div>
-        <div 
-          className={`tab ${activeTab === 'pr' ? 'active' : ''}`}
-          onClick={() => setActiveTab('pr')}
-        >
-          AI PR Simulator
-        </div>
+    <Router>
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans border-t-4 border-emerald-500">
+        {/* Navigation Top Bar */}
+        <header className="border-b border-slate-900 bg-slate-900/60 backdrop-blur-xl sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+
+            {/* Brand */}
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="w-11 h-11 rounded-xl overflow-hidden shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform ring-2 ring-emerald-500/30">
+                <img src="/logo.png" alt="CodeSage Logo" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <span className="text-xl font-black tracking-tighter block leading-none bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                  CodeSage
+                </span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mt-0.5">
+                  Autonomous PR Agent
+                </span>
+              </div>
+            </Link>
+
+            {/* Nav */}
+            <nav className="flex items-center gap-2">
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  `flex items-center gap-2 px-4 py-2 rounded-lg transition-all font-bold text-sm uppercase tracking-widest ${isActive ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:bg-slate-800'}`
+                }
+              >
+                <LayoutGrid className="w-4 h-4" /> Dashboard
+              </NavLink>
+              <div className="w-px h-6 bg-slate-800 mx-2" />
+              <div className="flex items-center gap-4 ml-2">
+                <a href="https://github.com/samithspalan" target="_blank" rel="noreferrer" className="text-slate-500 hover:text-white transition-colors">
+                  <Github className="w-5 h-5" />
+                </a>
+              </div>
+            </nav>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/log/:id" element={<LogDetail />} />
+            <Route path="*" element={<Dashboard />} />
+          </Routes>
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-slate-900 bg-slate-950 py-12">
+          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex items-center gap-3 opacity-30 grayscale">
+              <img src="/logo.png" alt="CodeSage" className="w-5 h-5 object-cover rounded" />
+              <span className="font-black tracking-tighter uppercase">CodeSage AI Agent</span>
+            </div>
+            <div className="flex gap-8 text-slate-500 text-xs font-bold uppercase tracking-widest">
+              <a href="#" className="hover:text-emerald-500 transition-colors">Documentation</a>
+              <a href="#" className="hover:text-emerald-500 transition-colors">API Status</a>
+              <a href="#" className="hover:text-emerald-500 transition-colors">Support</a>
+            </div>
+            <div className="text-slate-700 text-[10px] font-bold">
+              &copy; 2026 CODESAGE. ALL RIGHTS RESERVED.
+            </div>
+          </div>
+        </footer>
       </div>
-
-      {activeTab === 'agent' && (
-        <div className="card">
-          <h1>Inventory AI</h1>
-          <p className="subtitle">Conversational Agent</p>
-          
-          <form className="form-group" onSubmit={handleAskAgent}>
-            <input 
-              placeholder="e.g. 'What is low in stock?'"
-              value={agentInput}
-              onChange={(e) => setAgentInput(e.target.value)}
-              disabled={loading}
-            />
-            <button type="submit" disabled={loading}>
-              {loading ? 'Thinking...' : 'Ask Agent'}
-            </button>
-          </form>
-
-          {agentReply && (
-            <div className="reply-box">
-              <h3>Agent:</h3>
-              <p>{agentReply}</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {activeTab === 'pr' && (
-        <div className={`card ${prData ? 'wide' : ''}`}>
-          <h1>PR Generator</h1>
-          <p className="subtitle">Issue to Pull Request</p>
-          
-          <form className="form-group" onSubmit={handleGeneratePR}>
-            <textarea 
-              placeholder="Describe the issue (e.g. 'Add a login function that takes username and password')"
-              value={issueInput}
-              onChange={(e) => setIssueInput(e.target.value)}
-              disabled={loading}
-            />
-            <button type="submit" disabled={loading}>
-              {loading ? 'Analyzing Codebase...' : 'Generate Pull Request'}
-            </button>
-          </form>
-
-          {prData && (
-            <div className="pr-container">
-              <div className="pr-header">
-                <span className="pr-tag">Open PR</span>
-                <h2 className="pr-title">{prData.prTitle}</h2>
-                <p className="pr-desc">{prData.prDescription}</p>
-                <p style={{ marginTop: '12px', fontSize: '0.8rem', opacity: 0.5 }}>
-                  Target File: <code>{prData.file}</code>
-                </p>
-              </div>
-
-              <div className="diff-grid">
-                <div className="diff-col">
-                  <h4>Old: {prData.file}</h4>
-                  <div className="code-block original">{prData.originalCode}</div>
-                </div>
-                <div className="diff-col">
-                  <h4>New: {prData.file}</h4>
-                  <div className="code-block updated">{prData.updatedCode}</div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {error && <div className="error">⚠️ {error}</div>}
-    </div>
+    </Router>
   );
 }
 
