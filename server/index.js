@@ -107,7 +107,6 @@ const runPRWorkflow = async (owner, repo, pull_number, branch) => {
       return;
     }
     
-    // Set Memory
     lastProcessedShas.set(currentSha, true);
     lastProcessedTimes.set(pull_number, now);
     
@@ -119,7 +118,6 @@ const runPRWorkflow = async (owner, repo, pull_number, branch) => {
 
     let targetPatch = "";
     for (const f of files) {
-      // Skip files that have been deleted or have no diff
       if (!f.patch || f.status === 'removed') continue;
       microContext += `FILE: ${f.filename}\nDIFF:\n${f.patch}\n`;
       fileToFix = f.filename;
@@ -128,11 +126,17 @@ const runPRWorkflow = async (owner, repo, pull_number, branch) => {
 
     if (!microContext) return;
 
-    const prompt = `Senior Engineer: Review and fix these code changes for: ${fileToFix}
-List: Issues, Improvements. Output FULL CORRECTED CODE in \`\`\`javascript.
-Provide a "Confidence Score (0–100): based on correctness of fix" at the end of your response.
+    const prompt = `You are a strict senior software engineer performing a code audit. Your ONLY job is to find REAL bugs — not rewrite, refactor, or beautify code.
 
-DIFF DATA:
+## MANDATORY RULES (you MUST follow these exactly):
+1. READ the diff below carefully.
+2. CHECK only for: syntax errors, undefined variables, broken logic, missing return statements, invalid function calls, or runtime-breaking issues.
+3. DO NOT change code for: style, naming conventions, performance micro-optimizations, comment removal, or personal preference.
+4. IF the code has NO bugs or critical errors → respond with EXACTLY: "NO CHANGES NEEDED" on the first line. Do NOT output any code block. Do NOT suggest refactors.
+5. IF you find a REAL bug (syntax/logic only) → describe each bug clearly, then output the FULL corrected file in a single \`\`\`javascript block.
+6. At the end of your response, write: "Confidence Score: <number>" (0-100). If no changes were needed, use 100.
+
+## CODE DIFF for \`${fileToFix}\`:
 ${microContext}`;
 
     let output;
@@ -148,6 +152,22 @@ ${microContext}`;
         await postPRComment(owner, repo, pull_number, "🤖 **AI Status**: ⚠️ AI Services currently unavailable. Please retry later.");
         return;
       }
+    }
+
+    // 🛡️ Check if AI determined code is already correct (no real bugs found)
+    const noCodeBlock = !output.includes("```javascript") && !output.includes("```js");
+    const isPerfect = noCodeBlock && (
+      /NO CHANGES NEEDED/i.test(output) ||
+      /NO CHANGES REQUIRED/i.test(output) ||
+      /code is correct/i.test(output) ||
+      /no (bugs?|errors?|issues?|problems?) (found|detected|identified)/i.test(output) ||
+      /looks? (good|correct|fine|solid|clean)/i.test(output)
+    );
+
+    if (isPerfect) {
+      console.log(`✅ [No-Op] Code is already correct. Skipping commit for ${fileToFix}.`);
+      await postPRComment(owner, repo, pull_number, `🤖 **AI Audit Complete — No Issues Found**\n\n✅ I reviewed \`${fileToFix}\` and found **no logic or syntax errors**. The code is correct and no changes were made.\n\n--- *Analyzed by AI Agent | No auto-fix applied*`);
+      return;
     }
 
     // 🛡️ NEW: Support for Confidence Score (Improved Regex)
