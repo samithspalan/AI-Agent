@@ -7,8 +7,9 @@ import LandingPage from './components/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import CodeCorrector from './pages/CodeCorrector';
 import CodeExplainer from './pages/CodeExplainer';
+import CodeConverter from './pages/CodeConverter';
 import { useTheme } from './context/ThemeContext';
-import { LayoutGrid, Github, Sun, Moon, Code, HelpCircle } from 'lucide-react';
+import { LayoutGrid, Github, Sun, Moon, Code, HelpCircle, Repeat } from 'lucide-react';
 import './App.css';
 
 /* ── Theme Toggle Button ── */
@@ -34,7 +35,7 @@ const ThemeToggle = () => {
 const AppNavbar = () => {
   const { pathname } = useLocation();
   const { isDark } = useTheme();
-  const isAppRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/log/') || pathname.startsWith('/corrector') || pathname.startsWith('/explainer');
+  const isAppRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/log/') || pathname.startsWith('/corrector') || pathname.startsWith('/explainer') || pathname.startsWith('/converter');
   if (!isAppRoute) return null;
 
   return (
@@ -105,6 +106,20 @@ const AppNavbar = () => {
           >
             <HelpCircle className="w-3.5 h-3.5" /> Explainer
           </NavLink>
+          <NavLink
+            to="/converter"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-4 py-2 rounded-full transition-all font-bold text-xs uppercase tracking-widest ${
+                isActive
+                  ? 'bg-emerald-600/80 text-white shadow-lg shadow-emerald-500/20'
+                  : isDark
+                    ? 'text-slate-400 hover:bg-white/5 hover:text-white'
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+              }`
+            }
+          >
+            <Repeat className="w-3.5 h-3.5" /> Converter
+          </NavLink>
         </nav>
 
         {/* Right side */}
@@ -168,6 +183,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CodeExplainer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/converter"
+          element={
+            <ProtectedRoute>
+              <CodeConverter />
             </ProtectedRoute>
           }
         />

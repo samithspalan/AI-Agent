@@ -16,6 +16,8 @@ const app = express();
 const PORT = 5000;
 const correctCodeRoute = require('./routes/correctCode');
 const explainCodeRoute = require('./routes/explainCode');
+const convertCodeRoute = require('./routes/convertCode');
+const analyzeComplexityRoute = require('./routes/analyzeComplexity');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -23,6 +25,8 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/correct-code', correctCodeRoute);
 app.use('/api/explain-code', explainCodeRoute);
+app.use('/api/convert-code', convertCodeRoute);
+app.use('/api/analyze-complexity', analyzeComplexityRoute);
 
 const lastProcessedShas = new Map();
 const lastProcessedTimes = new Map();
