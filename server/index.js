@@ -26,7 +26,10 @@ const generateCodeRoute = require('./routes/generateCode');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://ai-agent-1-r12b.onrender.com', // Set this to your frontend URL
+  credentials: true
+}));
 app.use(express.json());
 app.use('/api/correct-code', correctCodeRoute);
 app.use('/api/explain-code', explainCodeRoute);
