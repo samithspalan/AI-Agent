@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { 
-  Code, 
-  Trash2, 
-  Copy, 
-  Sparkles, 
-  ChevronDown, 
-  ChevronUp, 
-  Loader2, 
+import {
+  Code,
+  Trash2,
+  Copy,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
   Check,
   Zap,
   ShieldCheck,
@@ -23,7 +23,7 @@ const CodeCorrector = () => {
   const [showExplanation, setShowExplanation] = useState(false);
   const [explanation, setExplanation] = useState('');
   const { isDark } = useTheme();
-  
+
   const eventSourceRef = useRef(null);
   const outputRef = useRef(null);
 
@@ -48,7 +48,7 @@ const CodeCorrector = () => {
     setShowExplanation(false);
 
     try {
-      const response = await fetch('http://localhost:5000/api/correct-code', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/correct-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -156,20 +156,19 @@ const CodeCorrector = () => {
         <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              
+
             </div>
             <h1 className="text-4xl font-black bg-gradient-to-r from-blue-400 via-emerald-300 to-blue-400 text-transparent bg-clip-text tracking-tight">
               Code Correction
             </h1>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className={`px-4 py-2 rounded-xl border appearance-none cursor-pointer outline-none transition-all font-bold text-xs uppercase tracking-widest ${
-                isDark ? 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-              }`}
+              className={`px-4 py-2 rounded-xl border appearance-none cursor-pointer outline-none transition-all font-bold text-xs uppercase tracking-widest ${isDark ? 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
             >
               {languages.map((lang) => (
                 <option key={lang.value} value={lang.value}>{lang.label}</option>
@@ -177,9 +176,8 @@ const CodeCorrector = () => {
             </select>
             <button
               onClick={clearInput}
-              className={`p-2.5 rounded-xl border transition-all ${
-                isDark ? 'bg-white/5 border-white/10 text-slate-400 hover:text-red-400 hover:bg-red-400/10' : 'bg-white border-slate-200 text-slate-500 hover:text-red-500 hover:bg-red-50'
-              }`}
+              className={`p-2.5 rounded-xl border transition-all ${isDark ? 'bg-white/5 border-white/10 text-slate-400 hover:text-red-400 hover:bg-red-400/10' : 'bg-white border-slate-200 text-slate-500 hover:text-red-500 hover:bg-red-50'
+                }`}
               title="Clear all"
             >
               <Trash2 className="w-5 h-5" />
@@ -189,7 +187,7 @@ const CodeCorrector = () => {
 
         {/* Main Panels */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-center">
-          
+
           {/* Left Panel: Input */}
           <div className={`relative flex flex-col h-[600px] border rounded-3xl overflow-hidden backdrop-blur-md transition-all ${cardBg}`}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
@@ -216,20 +214,19 @@ const CodeCorrector = () => {
             <button
               onClick={handleCorrect}
               disabled={isCorrecting || !inputCode.trim()}
-              className={`relative group w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 ${
-                isCorrecting 
-                  ? 'bg-emerald-500/20 text-emerald-400' 
-                  : inputCode.trim() 
-                    ? 'bg-emerald-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:scale-110 active:scale-95' 
+              className={`relative group w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 ${isCorrecting
+                  ? 'bg-emerald-500/20 text-emerald-400'
+                  : inputCode.trim()
+                    ? 'bg-emerald-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:scale-110 active:scale-95'
                     : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
-              }`}
+                }`}
             >
               {isCorrecting ? (
                 <Loader2 className="w-6 h-6 animate-spin" />
               ) : (
                 <Sparkles className="w-6 h-6 group-hover:rotate-12 transition-transform" />
               )}
-              
+
               {/* Tooltip */}
               <div className="absolute left-1/2 -bottom-10 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10 uppercase tracking-widest">
                 Correct Code
@@ -238,9 +235,8 @@ const CodeCorrector = () => {
           </div>
 
           {/* Right Panel: AI Output */}
-          <div className={`relative flex flex-col h-[600px] border rounded-3xl overflow-hidden backdrop-blur-md transition-all ${
-            outputCode ? 'border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.1)]' : cardBg
-          }`}>
+          <div className={`relative flex flex-col h-[600px] border rounded-3xl overflow-hidden backdrop-blur-md transition-all ${outputCode ? 'border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.1)]' : cardBg
+            }`}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
@@ -249,16 +245,15 @@ const CodeCorrector = () => {
               <button
                 onClick={copyToClipboard}
                 disabled={!outputCode}
-                className={`p-1.5 rounded-lg transition-all ${
-                  isCopied 
-                    ? 'text-emerald-400 bg-emerald-400/10' 
+                className={`p-1.5 rounded-lg transition-all ${isCopied
+                    ? 'text-emerald-400 bg-emerald-400/10'
                     : 'text-slate-400 hover:text-white hover:bg-white/10'
-                }`}
+                  }`}
               >
                 {isCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </button>
             </div>
-            
+
             <div className="relative flex-1 overflow-hidden">
               {isCorrecting && (
                 <div className="absolute inset-0 z-10 pointer-events-none">
@@ -269,9 +264,8 @@ const CodeCorrector = () => {
                 readOnly
                 value={outputCode}
                 placeholder={isCorrecting ? "Gemini is thinking..." : "AI-corrected code will appear here..."}
-                className={`w-full h-full p-6 code-textarea outline-none resize-none bg-transparent ${
-                  outputCode ? 'text-emerald-400/90' : textSecondary
-                }`}
+                className={`w-full h-full p-6 code-textarea outline-none resize-none bg-transparent ${outputCode ? 'text-emerald-400/90' : textSecondary
+                  }`}
               />
             </div>
           </div>
@@ -282,11 +276,10 @@ const CodeCorrector = () => {
           <button
             onClick={() => setShowExplanation(!showExplanation)}
             disabled={!explanation}
-            className={`flex items-center gap-3 px-6 py-4 rounded-2xl border transition-all w-full text-left ${
-              explanation 
+            className={`flex items-center gap-3 px-6 py-4 rounded-2xl border transition-all w-full text-left ${explanation
                 ? (isDark ? 'bg-blue-500/5 border-blue-500/20 hover:bg-blue-500/10' : 'bg-blue-50 border-blue-200 hover:bg-blue-100')
                 : (isDark ? 'opacity-50 cursor-not-allowed border-white/10 text-slate-600' : 'opacity-50 cursor-not-allowed border-slate-200 text-slate-400')
-            }`}
+              }`}
           >
             <div className={`p-1.5 rounded-lg ${explanation ? 'bg-blue-500/10 text-blue-400' : 'text-slate-600'}`}>
               <Cpu className="w-4 h-4" />

@@ -12,7 +12,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/logs');
+        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/logs`);
         setLogs(data);
       } catch (err) {
         console.error('Failed to fetch logs:', err);
@@ -170,11 +170,10 @@ const Dashboard = () => {
                   {/* Card Footer */}
                   <div className="mt-auto p-6 pt-0">
                     <div className="flex items-center justify-between mb-4">
-                      <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${
-                        isHighConfidence
+                      <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${isHighConfidence
                           ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
                           : 'bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
-                      }`}>
+                        }`}>
                         <Activity className="w-3.5 h-3.5" />
                         <span className="text-[10px] font-black uppercase tracking-widest">Conf {log.confidence}%</span>
                       </div>

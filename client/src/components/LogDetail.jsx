@@ -13,7 +13,7 @@ const LogDetail = () => {
   useEffect(() => {
     const fetchLog = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/logs/${id}`);
+        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/logs/${id}`);
         setLog(data);
       } catch (err) {
         console.error('Failed to fetch log details:', err);
@@ -89,11 +89,10 @@ const LogDetail = () => {
             <span className={`text-xs font-bold uppercase tracking-widest mb-1 italic ${textMuted}`}>
               Processed on {new Date(log.createdAt).toLocaleString()}
             </span>
-            <div className={`px-4 py-1.5 rounded-lg border font-bold flex items-center gap-2 shadow-md ${
-              log.confidence >= 75
+            <div className={`px-4 py-1.5 rounded-lg border font-bold flex items-center gap-2 shadow-md ${log.confidence >= 75
                 ? 'bg-emerald-500/10 border-emerald-400 text-emerald-400'
                 : 'bg-amber-500/10 border-amber-400 text-amber-400'
-            }`}>
+              }`}>
               {log.confidence >= 75 ? <CheckCircle className="w-4 h-4" /> : <Info className="w-4 h-4" />}
               Confidence: {log.confidence}%
             </div>

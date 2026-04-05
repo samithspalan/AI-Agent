@@ -17,7 +17,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/aiagent',
   .catch(err => console.error('❌ MongoDB Connection Error:', err.message));
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 const correctCodeRoute = require('./routes/correctCode');
 const explainCodeRoute = require('./routes/explainCode');
 const convertCodeRoute = require('./routes/convertCode');
@@ -50,9 +50,9 @@ const getPRFiles = async (o, r, n) => await githubFetch(`https://api.github.com/
 const getFileContent = async (o, r, p, ref) => {
   const data = await githubFetch(`https://api.github.com/repos/${o}/${r}/contents/${p}${ref ? `?ref=${ref}` : ''}`);
   if (data.error) throw new Error(`GitHub File Fetch Error: ${data.message} (${p})`);
-  return { 
-    code: data.content ? Buffer.from(data.content, 'base64').toString('utf8') : '', 
-    sha: data.sha 
+  return {
+    code: data.content ? Buffer.from(data.content, 'base64').toString('utf8') : '',
+    sha: data.sha
   };
 };
 const updateFileOnGitHub = async (o, r, p, code, br, sha, msg = "AI auto-fix: applied fixes") => await githubFetch(`https://api.github.com/repos/${o}/${r}/contents/${p}`, 'PUT', { message: msg, content: Buffer.from(code).toString('base64'), branch: br, sha });
@@ -73,12 +73,12 @@ const callGroqAI = async (prompt) => {
         messages: [{ role: "user", content: prompt }]
       })
     });
-    
+
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Groq Fail: ${error.error?.message || response.statusText}`);
+      const error = await response.json();
+      throw new Error(`Groq Fail: ${error.error?.message || response.statusText}`);
     }
-    
+
     const data = await response.json();
     return data.choices[0].message.content;
   } catch (err) {
@@ -105,7 +105,7 @@ const runPRWorkflow = async (owner, repo, pull_number, branch) => {
     const lastTime = lastProcessedTimes.get(pull_number) || 0;
 
     if (now - lastTime < 30000) {
-      console.log(`🛡️ Loop Intercepted: PR #${pull_number} was just updated ${Math.round((now-lastTime)/1000)}s ago.`);
+      console.log(`🛡️ Loop Intercepted: PR #${pull_number} was just updated ${Math.round((now - lastTime) / 1000)}s ago.`);
       return;
     }
 
@@ -120,10 +120,10 @@ const runPRWorkflow = async (owner, repo, pull_number, branch) => {
       console.log(`🛡️ Loop Intercepted: Already seen SHA ${currentSha.slice(0, 7)}`);
       return;
     }
-    
+
     lastProcessedShas.set(currentSha, true);
     lastProcessedTimes.set(pull_number, now);
-    
+
     console.log(`🚀 [Micro-Context Mode] PR #${pull_number} (SHA: ${currentSha.slice(0, 7)})`);
 
     const files = await getPRFiles(owner, repo, pull_number);
@@ -193,21 +193,21 @@ ${microContext}`;
 
     // 🛡️ MODIFIED: More robust regex to catch "Corrected Code", "Fixed Code", or just naked code blocks
     const codeMatch = output.match(/(?:Fixed Code|Corrected Code|Full Corrected Code|Updated Code|Revised Code):?\s*\n```[a-z]*\n([\s\S]*?)```/i) || output.match(/```javascript\n([\s\S]*?)```/i) || output.match(/```\n([\s\S]*?)```/i);
-    
+
     if (confidence >= 75 && codeMatch && codeMatch[1]) {
       const fixedCode = codeMatch[1].trim();
       const fileData = await getFileContent(owner, repo, fileToFix, branch);
       const latestSha = fileData.sha;
       const previousCode = fileData.code;
-      
+
       // 🚀 Step 1: Push the Auto-Fix Commit
       const commitMsg = `AI auto-fix: [${fileToFix}] applied fixes (Confidence: ${confidence}%)`;
       await updateFileOnGitHub(owner, repo, fileToFix, fixedCode, branch, latestSha, commitMsg);
-      
+
       // 📝 Step 2: Post a Celebration Audit Comment
       const auditSummary = output.split(/Fixed Code|Corrected Code|Updated Code|Revised Code/i)[0].trim();
       const finalMsg = `🤖 **Auto-Fix Deployed & Verified!** 🚀\n\nI've analyzed your changes and pushed a professional upgrade to \`${fileToFix}\`.\n\n### 🛡️ What was Improved:\n${auditSummary}\n\n--- *Code refined and committed automatically by AI Agent (Confidence: ${confidence}%)*`;
-      
+
       await postPRComment(owner, repo, pull_number, finalMsg);
       console.log(`✅ AI Success: Fix committed and documented on PR #${pull_number}`);
 
@@ -230,16 +230,16 @@ ${microContext}`;
     } else {
       const reason = !codeMatch ? "no clear code block identified" : `low confidence score (${confidence}%)`;
       console.warn(`⚠️ AI provided a review but ${reason}. Posting review only.`);
-      
+
       let reviewBody = output;
       if (confidence < 75 && confidenceMatch) {
-          reviewBody = `🤖 **AI Review (Caution: Low Confidence: ${confidence}%)**\n\n${output}\n\n--- *Auto-fix was NOT applied due to confidence threshold.*`;
+        reviewBody = `🤖 **AI Review (Caution: Low Confidence: ${confidence}%)**\n\n${output}\n\n--- *Auto-fix was NOT applied due to confidence threshold.*`;
       } else if (!codeMatch) {
-          reviewBody = `🤖 **AI Review (No Auto-Fix Applied)**\n\n${output}\n\n--- *Agent could not extract a clean code block to commit.*`;
+        reviewBody = `🤖 **AI Review (No Auto-Fix Applied)**\n\n${output}\n\n--- *Agent could not extract a clean code block to commit.*`;
       }
 
       await postPRComment(owner, repo, pull_number, reviewBody);
-      
+
       // 📦 SAVE REVIEW LOG TO DATABASE (Optional, but useful)
       try {
         await new AgentLog({
@@ -250,7 +250,7 @@ ${microContext}`;
           updatedCode: "",  // No fix applied
           summary: output,
           confidence: confidence,
-          patch: microContext, 
+          patch: microContext,
         }).save();
         console.log("📦 Saved AI review log to database");
       } catch (dbErr) {
@@ -270,7 +270,7 @@ app.post('/api/webhook', async (req, res) => {
     const crypto = require('crypto');
     const hmac = crypto.createHmac('sha256', secret);
     const digest = 'sha256=' + hmac.update(JSON.stringify(req.body)).digest('hex');
-    
+
     if (signature !== digest) {
       console.warn('⚠️ Webhook Signature Verification Failed!');
       return res.status(401).send('Invalid Signature');
@@ -283,13 +283,13 @@ app.post('/api/webhook', async (req, res) => {
 
   // 🛡️ REINFORCED LOOP PROTECTION: Check sender and latest activity
   if (senderType === "Bot") return res.status(200).send('Ignored: Bot');
-  
+
   if (event === "pull_request") {
     // Check if the PR update was actually triggered by an AI auto-fix commit
     // (GitHub doesn't always show the commit msg in the PR event, so we use a "last fix" timestamp check if needed)
     if (action === "opened" || action === "synchronize") {
       const { repository, pull_request } = req.body;
-      
+
       // Additional Safety: If the PR title says "AI auto-fix", we might be in a loop
       if (pull_request.title.includes("AI auto-fix")) return res.status(200).send('Ignored: AI PR');
 

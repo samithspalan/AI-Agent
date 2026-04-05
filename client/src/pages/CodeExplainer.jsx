@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useTheme } from '../context/ThemeContext';
-import { 
-  Code, 
-  HelpCircle, 
-  BookOpen, 
-  BadgeCheck, 
-  Layers, 
-  Zap, 
-  Loader2, 
+import {
+  Code,
+  HelpCircle,
+  BookOpen,
+  BadgeCheck,
+  Layers,
+  Zap,
+  Loader2,
   Trash2,
   ChevronRight,
   Info,
@@ -42,7 +42,7 @@ const CodeExplainer = () => {
     setExplanationData(null);
 
     try {
-      const { data } = await axios.post('http://localhost:5000/api/explain-code', {
+      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/explain-code`, {
         code: inputCode,
         language
       });
@@ -103,14 +103,13 @@ const CodeExplainer = () => {
               </h1>
               <p className={`font-medium ${textSecondary}`}>Break down complex logic into human-friendly explanations.</p>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className={`px-4 py-2.5 rounded-xl border appearance-none cursor-pointer outline-none transition-all font-bold text-xs uppercase tracking-widest ${
-                  isDark ? 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'
-                }`}
+                className={`px-4 py-2.5 rounded-xl border appearance-none cursor-pointer outline-none transition-all font-bold text-xs uppercase tracking-widest ${isDark ? 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'
+                  }`}
               >
                 {languages.map((lang) => (
                   <option key={lang.value} value={lang.value}>{lang.label}</option>
@@ -118,9 +117,8 @@ const CodeExplainer = () => {
               </select>
               <button
                 onClick={clearAll}
-                className={`p-2.5 rounded-xl border transition-all ${
-                  isDark ? 'bg-white/5 border-white/10 text-slate-400 hover:text-red-400 hover:bg-red-400/10' : 'bg-white border-slate-200 text-slate-500 hover:text-red-500 hover:bg-red-50'
-                }`}
+                className={`p-2.5 rounded-xl border transition-all ${isDark ? 'bg-white/5 border-white/10 text-slate-400 hover:text-red-400 hover:bg-red-400/10' : 'bg-white border-slate-200 text-slate-500 hover:text-red-500 hover:bg-red-50'
+                  }`}
                 title="Clear input"
               >
                 <Trash2 className="w-5 h-5" />
@@ -128,11 +126,10 @@ const CodeExplainer = () => {
               <button
                 onClick={handleExplain}
                 disabled={isExplaining || !inputCode.trim()}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${
-                  inputCode.trim() 
-                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20 hover:scale-105 active:scale-95' 
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${inputCode.trim()
+                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20 hover:scale-105 active:scale-95'
                     : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5'
-                }`}
+                  }`}
               >
                 {isExplaining ? (
                   <> <Loader2 className="w-4 h-4 animate-spin" /> Analyzing... </>
@@ -184,13 +181,12 @@ const CodeExplainer = () => {
               </div>
 
               {(explanationData.lines || []).map((line, index) => (
-                <div 
-                  key={index} 
-                  className={`grid grid-cols-[60px_1fr_1.5fr] group transition-colors duration-200 ${
-                    index % 2 === 0 
-                      ? (isDark ? 'bg-white/[0.02]' : 'bg-white') 
+                <div
+                  key={index}
+                  className={`grid grid-cols-[60px_1fr_1.5fr] group transition-colors duration-200 ${index % 2 === 0
+                      ? (isDark ? 'bg-white/[0.02]' : 'bg-white')
                       : (isDark ? 'bg-transparent' : 'bg-slate-50/50')
-                  } hover:bg-blue-500/5`}
+                    } hover:bg-blue-500/5`}
                 >
                   {/* Line Number */}
                   <div className={`py-4 text-center font-bold text-xs select-none border-r ${isDark ? 'text-slate-600 border-white/5' : 'text-slate-300 border-slate-100'}`}>
@@ -247,13 +243,13 @@ const CodeExplainer = () => {
             </div>
           )
         )}
-        
+
         {isExplaining && (
           <div className="flex flex-col items-center justify-center py-24">
-             <div className="relative w-20 h-20 mb-6">
-                <div className="absolute inset-0 rounded-full border-t-2 border-b-2 border-blue-500 animate-[spin_1s_linear_infinite]" />
-                <div className="absolute inset-3 rounded-full border-l-2 border-r-2 border-cyan-500 animate-[spin_1.5s_linear_infinite_reverse]" />
-                <Layers className="absolute inset-6 w-8 h-8 text-blue-400 opacity-50" />
+            <div className="relative w-20 h-20 mb-6">
+              <div className="absolute inset-0 rounded-full border-t-2 border-b-2 border-blue-500 animate-[spin_1s_linear_infinite]" />
+              <div className="absolute inset-3 rounded-full border-l-2 border-r-2 border-cyan-500 animate-[spin_1.5s_linear_infinite_reverse]" />
+              <Layers className="absolute inset-6 w-8 h-8 text-blue-400 opacity-50" />
             </div>
             <p className={`text-xl font-black uppercase tracking-[0.3em] bg-gradient-to-r from-blue-400 to-cyan-400 text-transparent bg-clip-text animate-pulse`}>
               Agent Decoding Code...
