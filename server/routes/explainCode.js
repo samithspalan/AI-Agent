@@ -32,10 +32,8 @@ const callGroqAI = async (prompt) => {
   return JSON.parse(data.choices[0].message.content);
 };
 
-// Helper for Gemini (Fallback)
 const callGeminiAI = async (prompt) => {
-  // Use gemini-pro or gemini-1.5-flash-latest for better compatibility
-  const model = genAI.getGenerativeModel({ 
+ const model = genAI.getGenerativeModel({ 
     model: "gemini-1.5-flash-latest",
     generationConfig: { responseMimeType: "application/json" }
   });

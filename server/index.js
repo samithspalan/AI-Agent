@@ -18,6 +18,7 @@ const correctCodeRoute = require('./routes/correctCode');
 const explainCodeRoute = require('./routes/explainCode');
 const convertCodeRoute = require('./routes/convertCode');
 const analyzeComplexityRoute = require('./routes/analyzeComplexity');
+const generateCodeRoute = require('./routes/generateCode');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -27,6 +28,7 @@ app.use('/api/correct-code', correctCodeRoute);
 app.use('/api/explain-code', explainCodeRoute);
 app.use('/api/convert-code', convertCodeRoute);
 app.use('/api/analyze-complexity', analyzeComplexityRoute);
+app.use('/api/generate-code', generateCodeRoute);
 
 const lastProcessedShas = new Map();
 const lastProcessedTimes = new Map();
@@ -257,6 +259,20 @@ ${microContext}`;
 // --- ROUTES ---
 
 app.post('/api/webhook', async (req, res) => {
+  const signature = req.headers['x-hub-signature-256'];
+  const secret = process.env.GITHUB_WEBHOOK_SECRET;
+
+  if (secret && signature) {
+    const crypto = require('crypto');
+    const hmac = crypto.createHmac('sha256', secret);
+    const digest = 'sha256=' + hmac.update(JSON.stringify(req.body)).digest('hex');
+    
+    if (signature !== digest) {
+      console.warn('⚠️ Webhook Signature Verification Failed!');
+      return res.status(401).send('Invalid Signature');
+    }
+  }
+
   const event = req.headers["x-github-event"];
   const action = req.body?.action;
   const senderType = req.body?.sender?.type;
