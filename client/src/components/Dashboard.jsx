@@ -82,7 +82,7 @@ const Dashboard = () => {
         </>
       )}
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-32">
 
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-16">
