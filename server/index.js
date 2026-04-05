@@ -9,7 +9,11 @@ require('dotenv').config();
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/aiagent', {
   serverSelectionTimeoutMS: 5000
 })
-  .then(() => console.log('📦 Connected to MongoDB (Local System)'))
+  .then((conn) => {
+    const host = conn.connection.host;
+    const isAtlas = host.includes('mongodb.net');
+    console.log(`📦 Connected to MongoDB (${isAtlas ? 'Production Atlas' : 'Local Instance'} - ${host})`);
+  })
   .catch(err => console.error('❌ MongoDB Connection Error:', err.message));
 
 const app = express();
