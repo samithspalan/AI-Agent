@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-require('dotenv-safe').config();
+require('dotenv').config();
 
 // Models & Services
 const { runPRWorkflow, githubFetch } = require('./services/githubAgent');
@@ -31,7 +31,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: process.env.CLIENT_URL || 'https://ai-agent-1-r12b.onrender.com',
   credentials: true
 }));
 app.use(express.json());

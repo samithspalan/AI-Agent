@@ -43,7 +43,7 @@ const CodeComplexity = () => {
     setAnalysis(null);
 
     try {
-      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/analyze-complexity`, {
+      const { data } = await axios.post(`${import.meta.env.VITE_API_URL || 'https://ai-agent-apnv.onrender.com'}/api/analyze-complexity`, {
         code: inputCode,
         language
       });

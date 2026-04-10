@@ -42,10 +42,12 @@ const CodeExplainer = () => {
     setExplanationData(null);
 
     try {
-      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/explain-code`, {
-        code: inputCode,
-        language
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://ai-agent-apnv.onrender.com'}/api/explain-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: inputCode, language })
       });
+      const data = await response.json();
       setExplanationData(data);
     } catch (error) {
       console.error('Explanation Error:', error);

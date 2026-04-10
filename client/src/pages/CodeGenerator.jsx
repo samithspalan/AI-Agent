@@ -48,7 +48,7 @@ const CodeGenerator = () => {
     setExplanation('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/generate-code`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://ai-agent-apnv.onrender.com'}/api/generate-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

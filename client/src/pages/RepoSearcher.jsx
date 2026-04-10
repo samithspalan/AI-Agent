@@ -51,7 +51,7 @@ const RepoSearcher = () => {
     setSetupCommands('');
     setDownloadUrl('');
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://ai-agent-apnv.onrender.com';
       const resp = await axios.post(`${apiUrl}/api/search-repos`, { query, requirements });
       setResult(resp.data.analysis);
       setCandidates(resp.data.candidates || []);
@@ -78,7 +78,7 @@ const RepoSearcher = () => {
     setSetupCommands('');
     setDownloadUrl('');
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/scaffold`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://ai-agent-apnv.onrender.com'}/api/scaffold`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ repoUrl, repoName })

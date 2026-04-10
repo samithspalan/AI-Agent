@@ -33,7 +33,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/analytics`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'https://ai-agent-apnv.onrender.com'}/api/analytics`);
         setData(response.data);
       } catch (err) {
         console.error("Dashboard error:", err);

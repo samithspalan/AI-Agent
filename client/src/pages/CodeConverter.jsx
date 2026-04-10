@@ -44,7 +44,7 @@ const CodeConverter = () => {
     setOutputCode('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/convert-code`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://ai-agent-apnv.onrender.com'}/api/convert-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -48,7 +48,7 @@ const CodeCorrector = () => {
     setShowExplanation(false);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/correct-code`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://ai-agent-apnv.onrender.com'}/api/correct-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

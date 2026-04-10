@@ -28,7 +28,7 @@ const LogDetail = () => {
   useEffect(() => {
     const fetchLog = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/logs/${id}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'https://ai-agent-apnv.onrender.com'}/api/logs/${id}`);
         setLog(response.data);
       } catch (err) {
         console.error("Log error:", err);
