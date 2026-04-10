@@ -126,7 +126,7 @@ const CodeGenerator = () => {
   const textSecondary = isDark ? 'text-slate-400' : 'text-slate-500';
 
   return (
-    <div className={`min-h-screen ${bg} pt-32 pb-20 px-6 transition-colors duration-300 relative overflow-hidden`}>
+    <div className={`min-h-screen ${bg} pt-24 pb-20 px-6 transition-colors duration-300 relative overflow-hidden`}>
       <style>{`
         .code-textarea {
           font-family: 'JetBrains Mono', 'Fira Code', monospace;
@@ -145,18 +145,17 @@ const CodeGenerator = () => {
       <div className="max-w-7xl mx-auto relative z-10">
 
         {/* Modern Compact Header */}
-        <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                <Sparkles className="w-5 h-5 text-blue-400" />
-              </div>
-              <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${textSecondary}`}>Generative Blueprint Engine</span>
+        <header className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 shrink-0">
+              <Sparkles className="w-5 h-5 text-blue-400" />
             </div>
-            <h1 className="text-4xl lg:text-5xl font-black bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 text-transparent bg-clip-text tracking-tight mb-2">
-              Code Generator
-            </h1>
-            <p className={`font-medium ${textSecondary}`}>Translate requirements into stable, production-ready source code.</p>
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 text-transparent bg-clip-text tracking-tight">
+                Code Generator
+              </h1>
+              <p className={`text-xs font-medium ${textSecondary}`}>Translate requirements into stable, production-ready source code.</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -174,8 +173,8 @@ const CodeGenerator = () => {
               onClick={handleGenerate}
               disabled={isGenerating || !description.trim()}
               className={`flex items-center gap-3 px-8 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${description.trim()
-                  ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20 hover:scale-105 active:scale-95'
-                  : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5 opacity-50'
+                ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20 hover:scale-105 active:scale-95'
+                : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5 opacity-50'
                 }`}
             >
               {isGenerating ? (
@@ -188,7 +187,7 @@ const CodeGenerator = () => {
         </header>
 
         {/* Modern Split Panel Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch h-[650px]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch min-h-[380px] h-[calc(100vh-14rem)]">
 
           {/* Left Column: Requirements */}
           <div className="flex flex-col gap-6">

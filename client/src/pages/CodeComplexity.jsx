@@ -77,7 +77,7 @@ const CodeComplexity = () => {
   const textSecondary = isDark ? 'text-slate-400' : 'text-slate-500';
 
   return (
-    <div className={`min-h-screen ${bg} pt-32 pb-20 px-6 transition-colors duration-300 relative overflow-hidden`}>
+    <div className={`min-h-screen ${bg} pt-24 pb-20 px-6 transition-colors duration-300 relative overflow-hidden`}>
       <style>{`
         .code-textarea {
           font-family: 'JetBrains Mono', 'Fira Code', monospace;
@@ -96,18 +96,17 @@ const CodeComplexity = () => {
       <div className="max-w-7xl mx-auto relative z-10">
 
         {/* Header Title */}
-        <header className="mb-10 text-center lg:text-left flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-          <div>
-            <div className="flex items-center justify-center lg:justify-start gap-2 mb-2">
-              <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                <BarChart2 className="w-5 h-5 text-emerald-400" />
-              </div>
-              <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${textSecondary}`}>Scale Profiler v4</span>
+        <header className="mb-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 shrink-0">
+              <BarChart2 className="w-5 h-5 text-emerald-400" />
             </div>
-            <h1 className="text-4xl lg:text-5xl font-black bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 text-transparent bg-clip-text tracking-tight mb-2">
-              Complexity Analyzer
-            </h1>
-            <p className={`font-medium ${textSecondary}`}>Identify algorithmic bottlenecks and optimize your memory footprint.</p>
+            <div className="text-left">
+              <h1 className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 text-transparent bg-clip-text tracking-tight">
+                Complexity Analyzer
+              </h1>
+              <p className={`text-xs font-medium ${textSecondary}`}>Identify algorithmic bottlenecks and optimize your memory footprint.</p>
+            </div>
           </div>
 
           <div className="flex items-center justify-center gap-3">
@@ -125,8 +124,8 @@ const CodeComplexity = () => {
               onClick={handleAnalyze}
               disabled={isAnalyzing || !inputCode.trim()}
               className={`flex items-center gap-2 px-8 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${inputCode.trim()
-                  ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-600/20 hover:scale-105 active:scale-95'
-                  : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5 opacity-50'
+                ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-600/20 hover:scale-105 active:scale-95'
+                : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5 opacity-50'
                 }`}
             >
               {isAnalyzing ? (
@@ -139,7 +138,7 @@ const CodeComplexity = () => {
         </header>
 
         {/* Split Panel Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch h-[650px]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch min-h-[380px] h-[calc(100vh-14rem)]">
 
           {/* Left Column: Input */}
           <div className={`relative flex flex-col border rounded-[2.5rem] overflow-hidden backdrop-blur-md transition-all shadow-2xl ${cardBg}`}>

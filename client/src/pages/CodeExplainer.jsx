@@ -78,7 +78,7 @@ const CodeExplainer = () => {
   const textAreaBg = isDark ? 'bg-[#0A1120] border-white/10' : 'bg-slate-50 border-slate-200';
 
   return (
-    <div className={`min-h-screen ${bg} pt-32 pb-20 px-6 transition-colors duration-300 relative overflow-hidden`}>
+    <div className={`min-h-screen ${bg} pt-24 pb-20 px-6 transition-colors duration-300 relative overflow-hidden`}>
       {/* Background Decor */}
       {isDark && (
         <>
@@ -89,19 +89,18 @@ const CodeExplainer = () => {
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header Section */}
-        <header className="mb-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                  <BadgeCheck className="w-5 h-5 text-blue-400" />
-                </div>
-                <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${textSecondary}`}>Intelligent Insights</span>
+        <header className="mb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 shrink-0">
+                <BadgeCheck className="w-5 h-5 text-blue-400" />
               </div>
-              <h1 className="text-4xl lg:text-5xl font-black bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-400 text-transparent bg-clip-text tracking-tight mb-2">
-                Code Explainer
-              </h1>
-              <p className={`font-medium ${textSecondary}`}>Break down complex logic into human-friendly explanations.</p>
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-400 text-transparent bg-clip-text tracking-tight">
+                  Code Explainer
+                </h1>
+                <p className={`text-xs font-medium ${textSecondary}`}>Break down complex logic into human-friendly explanations.</p>
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
@@ -127,8 +126,8 @@ const CodeExplainer = () => {
                 onClick={handleExplain}
                 disabled={isExplaining || !inputCode.trim()}
                 className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${inputCode.trim()
-                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20 hover:scale-105 active:scale-95'
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5'
+                  ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20 hover:scale-105 active:scale-95'
+                  : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5'
                   }`}
               >
                 {isExplaining ? (
@@ -140,7 +139,7 @@ const CodeExplainer = () => {
             </div>
           </div>
 
-          <div className="mt-8 relative h-[300px] border rounded-3xl overflow-hidden backdrop-blur-md transition-all shadow-2xl">
+          <div className="mt-8 relative min-h-[180px] h-[calc(100vh-26rem)] border rounded-3xl overflow-hidden backdrop-blur-md transition-all shadow-2xl">
             <div className={`absolute top-0 left-0 w-full h-10 border-b flex items-center px-6 ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
               <div className="flex gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-red-500/50" />
@@ -184,8 +183,8 @@ const CodeExplainer = () => {
                 <div
                   key={index}
                   className={`grid grid-cols-[60px_1fr_1.5fr] group transition-colors duration-200 ${index % 2 === 0
-                      ? (isDark ? 'bg-white/[0.02]' : 'bg-white')
-                      : (isDark ? 'bg-transparent' : 'bg-slate-50/50')
+                    ? (isDark ? 'bg-white/[0.02]' : 'bg-white')
+                    : (isDark ? 'bg-transparent' : 'bg-slate-50/50')
                     } hover:bg-blue-500/5`}
                 >
                   {/* Line Number */}

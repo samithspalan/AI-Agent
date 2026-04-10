@@ -2,7 +2,7 @@
 
 CodeSage is a high-performance, autonomous AI development agent designed to revolutionize the software development lifecycle. It monitors your GitHub repositories in real-time, performing deep code audits on every Pull Request and autonomously pushing high-confidence fixes for logic and syntax bugs.
 
-![CodeSage Showcase](https://ai-agent-1-r12b.onrender.com/assets/showcase.png) <!-- Note: Replace with actual showcase image if available -->
+![CodeSage Showcase](https://ai-agent-1-r12b.onrender.com/)
 
 ## 🌟 Core Features
 

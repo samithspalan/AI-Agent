@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "start": "node index.js",
+    "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,11 +14,16 @@
   "type": "commonjs",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "archiver": "^7.0.1",
     "cors": "^2.8.6",
+    "dayjs": "^1.11.20",
     "dotenv": "^17.3.1",
+    "dotenv-safe": "^9.1.0",
     "express": "^5.2.1",
+    "joi": "^18.1.2",
     "mongoose": "^9.3.3",
     "nodemon": "^3.1.14",
-    "openai": "^6.32.0"
+    "openai": "^6.32.0",
+    "pm2": "^6.0.14"
   }
 }

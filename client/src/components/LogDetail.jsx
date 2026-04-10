@@ -1,22 +1,38 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
+import { 
+  ArrowLeft, 
+  Github, 
+  ShieldCheck, 
+  ShieldAlert, 
+  Loader2, 
+  Calendar,
+  Layers,
+  Code2,
+  Cpu,
+  Zap,
+  Check
+} from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { ArrowLeft, GitBranch, Github, Code, CheckCircle, AlertCircle, Info, Star } from 'lucide-react';
 
 const LogDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { isDark } = useTheme();
   const [log, setLog] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { isDark } = useTheme();
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchLog = async () => {
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/logs/${id}`);
-        setLog(data);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/logs/${id}`);
+        setLog(response.data);
       } catch (err) {
-        console.error('Failed to fetch log details:', err);
+        console.error("Log error:", err);
+        setError("Failed to locate target audit log history.");
       } finally {
         setLoading(false);
       }
@@ -24,140 +40,134 @@ const LogDetail = () => {
     fetchLog();
   }, [id]);
 
-  // Theme helpers
-  const bg = isDark ? 'bg-[#050A14]' : 'bg-slate-50';
-  const textPrimary = isDark ? 'text-slate-100' : 'text-slate-900';
-  const textSecondary = isDark ? 'text-slate-400' : 'text-slate-500';
-  const textMuted = isDark ? 'text-slate-500' : 'text-slate-400';
-  const borderCol = isDark ? 'border-white/10' : 'border-slate-200';
-  const cardBg = isDark ? 'bg-white/[0.04] border-white/10' : 'bg-white border-slate-200 shadow-sm';
-  const headerBg = isDark ? 'bg-white/5 border-slate-800' : 'bg-slate-50 border-slate-200';
-  const codeBg = isDark ? 'bg-slate-950/80 text-slate-400' : 'bg-slate-50 text-slate-600';
-  const codeGreenBg = isDark ? 'bg-slate-950 text-emerald-400/90' : 'bg-slate-50 text-emerald-700';
-  const patchBg = isDark ? 'bg-slate-950' : 'bg-slate-50';
-
-  if (loading) return (
-    <div className={`flex items-center justify-center min-h-screen transition-colors duration-300 ${bg}`}>
-      <div className="relative w-16 h-16">
-        <div className="absolute inset-0 rounded-full border-t-2 border-b-2 border-emerald-500 animate-[spin_1s_linear_infinite]" />
-        <div className="absolute inset-2 rounded-full border-l-2 border-r-2 border-blue-500 animate-[spin_1.5s_linear_infinite_reverse]" />
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-transparent">
+        <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (!log) return (
-    <div className={`flex flex-col items-center justify-center py-20 min-h-screen ${bg}`}>
-      <AlertCircle className="w-16 h-16 text-rose-500 mb-4" />
-      <h2 className={`text-2xl font-bold mb-4 ${textPrimary}`}>Log not found</h2>
-      <Link to="/dashboard" className="text-blue-500 flex items-center gap-2 font-medium hover:text-blue-400 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-      </Link>
-    </div>
-  );
+  if (error || !log) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="max-w-md w-full p-10 rounded-[2rem] border border-red-500/20 bg-red-500/5 text-center">
+          <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-6" />
+          <h2 className="text-lg font-black text-white mb-2 uppercase tracking-tight">Audit Missing</h2>
+          <p className="text-slate-500 text-xs mb-8 font-medium">{error || "The requested log record could not be retrieved from persistence."}</p>
+          <button 
+            onClick={() => navigate('/dashboard')}
+            className="w-full py-3 bg-slate-800 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-700 transition-all"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const isHighConfidence = log.confidence >= 75;
 
   return (
-    <div className={`min-h-screen pb-20 transition-colors duration-300 ${bg}`}>
-      <div className="max-w-7xl mx-auto px-4 pt-32 pb-8">
+    <div className={`min-h-screen pt-24 pb-20 px-6 transition-colors duration-500 ${isDark ? 'bg-[#050A14]' : 'bg-slate-50'}`}>
+      <div className="max-w-7xl mx-auto space-y-6">
+        
+        {/* Compact Navigation & Status */}
+        <div className="flex items-center justify-between">
+          <Link 
+            to="/dashboard" 
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-black text-[10px] uppercase tracking-widest transition-all ${isDark ? 'bg-white/5 border-white/10 text-slate-400 hover:text-white' : 'bg-white border-slate-200 text-slate-500 hover:text-slate-900 shadow-sm'}`}
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Dashboard
+          </Link>
+          <div className={`px-4 py-2 rounded-xl border flex items-center gap-3 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200'}`}>
+            <Calendar className="w-3.5 h-3.5 text-emerald-500" />
+            <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              {new Date(log.createdAt).toLocaleDateString()}
+            </span>
+          </div>
+        </div>
 
-        {/* Back link */}
-        <Link
-          to="/dashboard"
-          className={`inline-flex items-center gap-2 hover:text-blue-400 transition-colors mb-8 group font-medium uppercase tracking-widest text-xs ${textSecondary}`}
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Back to Logs Dashboard
-        </Link>
-
-        {/* Page header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400">
-              <Code className="w-6 h-6" />
+        {/* Ultra-Compact Header Card */}
+        <div className={`p-4 md:px-6 md:py-3 rounded-[1.5rem] border relative overflow-hidden transition-all ${isDark ? 'bg-white/5 border-white/10 shadow-lg' : 'bg-white border-slate-200 shadow-md'}`}>
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex gap-4 items-center">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center border border-emerald-500/20 shrink-0">
+                <Github className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h1 className={`text-base md:text-lg font-black truncate tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    {log.repo}
+                  </h1>
+                  <span className="text-emerald-500 font-bold text-sm">#{log.prNumber}</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[8px] font-black uppercase tracking-widest ${isDark ? 'bg-white/5 border-white/10 text-slate-500' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
+                    <Layers className="w-2.5 h-2.5" /> {log.branch}
+                  </div>
+                  <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[8px] font-black uppercase tracking-widest ${isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
+                    <Check className="w-2.5 h-2.5" /> Auto-Fix
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <h1 className={`text-2xl font-black flex items-center gap-3 ${textPrimary}`}>
-                Log Entry <span className="text-blue-500">#{id.slice(-6)}</span>
-              </h1>
-              <div className={`flex flex-wrap items-center gap-4 text-sm mt-1 ${textSecondary}`}>
-                <div className="flex items-center gap-1"><Github className="w-3 h-3" /> {log.repo}</div>
-                <div className="flex items-center gap-1"><GitBranch className="w-3 h-3" /> {log.branch}</div>
-                <div className="flex items-center gap-1"><Star className="w-3 h-3" /> PR #{log.prNumber}</div>
+
+            <div className={`px-4 py-2 rounded-xl flex items-center gap-3 border transition-all ${isHighConfidence ? 'bg-emerald-500/[0.03] border-emerald-500/20' : 'bg-blue-500/[0.03] border-blue-500/20'}`}>
+              <div className="shrink-0">
+                {isHighConfidence ? <ShieldCheck className="w-5 h-5 text-emerald-400" /> : <ShieldAlert className="w-5 h-5 text-blue-400" />}
+              </div>
+              <div className="text-left leading-none">
+                <p className={`text-xl font-black tracking-tighter ${isHighConfidence ? 'text-emerald-400' : 'text-blue-400'}`}>{log.confidence}%</p>
+                <p className={`text-[7px] font-black uppercase tracking-[0.2em] mt-0.5 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>AI Confidence</p>
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-start md:items-end">
-            <span className={`text-xs font-bold uppercase tracking-widest mb-1 italic ${textMuted}`}>
-              Processed on {new Date(log.createdAt).toLocaleString()}
-            </span>
-            <div className={`px-4 py-1.5 rounded-lg border font-bold flex items-center gap-2 shadow-md ${log.confidence >= 75
-                ? 'bg-emerald-500/10 border-emerald-400 text-emerald-400'
-                : 'bg-amber-500/10 border-amber-400 text-amber-400'
-              }`}>
-              {log.confidence >= 75 ? <CheckCircle className="w-4 h-4" /> : <Info className="w-4 h-4" />}
-              Confidence: {log.confidence}%
+        </div>
+
+        {/* Code Inspection Grid (Side by Side) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          
+          {/* Previous Code (Patch) */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 px-2">
+              <Zap className="w-3.5 h-3.5 text-emerald-500" />
+              <h3 className={`text-[9px] font-black uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Original Patch Context</h3>
+            </div>
+            <div className={`p-6 rounded-[1.5rem] border font-mono text-[11px] overflow-hidden relative ${isDark ? 'bg-black/50 border-white/10 text-blue-300' : 'bg-slate-900 border-slate-800 text-blue-100'}`}>
+              <pre className="max-h-[400px] overflow-y-auto custom-scrollbar leading-relaxed whitespace-pre pr-2">
+                {log.patch || "No patch data available."}
+              </pre>
+            </div>
+          </div>
+
+          {/* Corrected Code */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 px-2">
+              <Code2 className="w-3.5 h-3.5 text-emerald-400" />
+              <h3 className={`text-[9px] font-black uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Final AI Correction</h3>
+            </div>
+            <div className={`p-6 rounded-[1.5rem] border font-mono text-[11px] overflow-hidden relative ${isDark ? 'bg-emerald-950/20 border-emerald-500/20 text-emerald-300' : 'bg-slate-50 border-slate-200 text-emerald-800'}`}>
+              <pre className="max-h-[400px] overflow-y-auto custom-scrollbar leading-relaxed whitespace-pre pr-2">
+                {log.updatedCode || "No updated code data available."}
+              </pre>
             </div>
           </div>
         </div>
 
-        {/* Code panels */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Original */}
-          <div className={`flex flex-col h-[600px] rounded-xl border overflow-hidden transition-colors duration-300 ${cardBg}`}>
-            <div className={`p-4 border-b flex justify-between items-center ${headerBg}`}>
-              <span className={`text-xs font-bold uppercase tracking-widest flex items-center gap-2 ${textSecondary}`}>
-                <div className="w-2 h-2 rounded-full bg-rose-400" /> Original Codebase
-              </span>
-              <span className={`text-[10px] font-mono ${textMuted}`}>READ-ONLY</span>
+        {/* AI Analysis Summary (Below Code) */}
+        <div className={`p-8 md:p-10 rounded-[2rem] border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200 shadow-lg'}`}>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
+              <Cpu className="w-5 h-5" />
             </div>
-            <div className={`flex-grow overflow-auto p-4 font-mono text-sm leading-relaxed whitespace-pre transition-colors duration-300 ${codeBg}`}>
-              {log.previousCode || 'No previous code recorded (Review-only event)'}
+            <div>
+              <h3 className={`text-base font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>AI Audit Reasoning</h3>
+              <p className={`text-[9px] font-black uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Heuristic Breakdown</p>
             </div>
           </div>
-
-          {/* AI Fix */}
-          <div className={`flex flex-col h-[600px] rounded-xl border overflow-hidden transition-colors duration-300 ${isDark ? 'bg-white/[0.04] border-emerald-500/20 shadow-2xl shadow-emerald-500/5' : 'bg-white border-emerald-300 shadow-sm'}`}>
-            <div className={`p-4 border-b flex justify-between items-center ${isDark ? 'bg-white/5 border-slate-800' : 'bg-emerald-50 border-emerald-100'}`}>
-              <span className="text-xs font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-400" /> AI-Generated Fix
-              </span>
-              <span className={`text-[10px] font-mono ${isDark ? 'text-emerald-600/50' : 'text-emerald-500'}`}>PRODUCTION READY</span>
-            </div>
-            <div className={`flex-grow overflow-auto p-4 font-mono text-sm leading-relaxed whitespace-pre transition-colors duration-300 ${codeGreenBg}`}>
-              {log.updatedCode || 'Agent provided review only. No code changes applied.'}
-            </div>
-          </div>
-        </div>
-
-        {/* Patch diff */}
-        {log.patch && (
-          <div className={`mb-12 rounded-xl border overflow-hidden border-l-4 border-l-amber-500 transition-colors duration-300 ${cardBg}`}>
-            <div className={`p-4 border-b flex items-center gap-2 ${headerBg}`}>
-              <div className="w-2 h-2 rounded-full bg-amber-500" />
-              <span className={`text-xs font-bold uppercase tracking-widest ${textSecondary}`}>Line-by-Line Changes (Patch)</span>
-            </div>
-            <div className={`p-4 font-mono text-xs leading-relaxed overflow-x-auto whitespace-pre transition-colors duration-300 ${patchBg}`}>
-              {log.patch.split('\n').map((line, idx) => {
-                let cls = textSecondary;
-                let bg = '';
-                if (line.startsWith('+') && !line.startsWith('+++')) { cls = 'text-emerald-500'; bg = isDark ? 'bg-emerald-500/10' : 'bg-emerald-50'; }
-                else if (line.startsWith('-') && !line.startsWith('---')) { cls = 'text-rose-400'; bg = isDark ? 'bg-rose-500/10' : 'bg-rose-50'; }
-                else if (line.startsWith('@@')) { cls = isDark ? 'text-blue-400 opacity-50' : 'text-blue-500 opacity-70'; }
-                return (
-                  <div key={idx} className={`${bg} ${cls} px-2 py-0.5 rounded-sm`}>{line}</div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Summary */}
-        <div className={`rounded-xl border border-l-4 border-l-blue-500 p-8 transition-colors duration-300 ${isDark ? 'bg-gradient-to-br from-slate-900 to-slate-950 border-white/10' : 'bg-white border-slate-200 shadow-sm'}`}>
-          <h2 className={`text-xl font-bold mb-6 flex items-center gap-3 ${textPrimary}`}>
-            <Info className="w-5 h-5 text-blue-400" />
-            Analysis Summary &amp; Insights
-          </h2>
-          <div className={`leading-relaxed font-medium text-lg whitespace-pre-wrap ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-            {log.summary}
+          <div className={`prose prose-xs max-w-none ${isDark ? 'prose-invert' : 'prose-slate'}`}>
+            <ReactMarkdown>{log.summary}</ReactMarkdown>
           </div>
         </div>
 

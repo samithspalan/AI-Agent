@@ -129,7 +129,7 @@ const CodeCorrector = () => {
   const inputBg = isDark ? 'bg-[#0A1120] border-white/10' : 'bg-slate-50 border-slate-200';
 
   return (
-    <div className={`min-h-screen ${bg} pt-32 pb-20 px-6 transition-colors duration-300 relative overflow-hidden`}>
+    <div className={`min-h-screen ${bg} pt-24 pb-20 px-6 transition-colors duration-300 relative overflow-hidden`}>
       <style>{`
         @keyframes scan {
           0% { transform: translateY(-100%); }
@@ -153,14 +153,17 @@ const CodeCorrector = () => {
       )}
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-
+        <header className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 shrink-0">
+              <Code className="w-5 h-5 text-blue-400" />
             </div>
-            <h1 className="text-4xl font-black bg-gradient-to-r from-blue-400 via-emerald-300 to-blue-400 text-transparent bg-clip-text tracking-tight">
-              Code Correction
-            </h1>
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-blue-400 via-emerald-300 to-blue-400 text-transparent bg-clip-text tracking-tight">
+                Code Correction
+              </h1>
+              <p className={`text-xs font-medium ${textSecondary}`}>Refine and polish your source code with AI precision.</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -186,10 +189,10 @@ const CodeCorrector = () => {
         </header>
 
         {/* Main Panels */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-start">
 
           {/* Left Panel: Input */}
-          <div className={`relative flex flex-col h-[600px] border rounded-3xl overflow-hidden backdrop-blur-md transition-all ${cardBg}`}>
+          <div className={`relative flex flex-col min-h-[340px] h-[calc(100vh-18rem)] border rounded-3xl overflow-hidden backdrop-blur-md transition-all ${cardBg}`}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <div className="flex items-center gap-2">
                 <Code className="w-4 h-4 text-blue-400" />
@@ -215,10 +218,10 @@ const CodeCorrector = () => {
               onClick={handleCorrect}
               disabled={isCorrecting || !inputCode.trim()}
               className={`relative group w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 ${isCorrecting
-                  ? 'bg-emerald-500/20 text-emerald-400'
-                  : inputCode.trim()
-                    ? 'bg-emerald-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:scale-110 active:scale-95'
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : inputCode.trim()
+                  ? 'bg-emerald-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:scale-110 active:scale-95'
+                  : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
                 }`}
             >
               {isCorrecting ? (
@@ -235,7 +238,7 @@ const CodeCorrector = () => {
           </div>
 
           {/* Right Panel: AI Output */}
-          <div className={`relative flex flex-col h-[600px] border rounded-3xl overflow-hidden backdrop-blur-md transition-all ${outputCode ? 'border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.1)]' : cardBg
+          <div className={`relative flex flex-col min-h-[340px] h-[calc(100vh-18rem)] border rounded-3xl overflow-hidden backdrop-blur-md transition-all ${outputCode ? 'border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.1)]' : cardBg
             }`}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <div className="flex items-center gap-2">
@@ -246,8 +249,8 @@ const CodeCorrector = () => {
                 onClick={copyToClipboard}
                 disabled={!outputCode}
                 className={`p-1.5 rounded-lg transition-all ${isCopied
-                    ? 'text-emerald-400 bg-emerald-400/10'
-                    : 'text-slate-400 hover:text-white hover:bg-white/10'
+                  ? 'text-emerald-400 bg-emerald-400/10'
+                  : 'text-slate-400 hover:text-white hover:bg-white/10'
                   }`}
               >
                 {isCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -277,8 +280,8 @@ const CodeCorrector = () => {
             onClick={() => setShowExplanation(!showExplanation)}
             disabled={!explanation}
             className={`flex items-center gap-3 px-6 py-4 rounded-2xl border transition-all w-full text-left ${explanation
-                ? (isDark ? 'bg-blue-500/5 border-blue-500/20 hover:bg-blue-500/10' : 'bg-blue-50 border-blue-200 hover:bg-blue-100')
-                : (isDark ? 'opacity-50 cursor-not-allowed border-white/10 text-slate-600' : 'opacity-50 cursor-not-allowed border-slate-200 text-slate-400')
+              ? (isDark ? 'bg-blue-500/5 border-blue-500/20 hover:bg-blue-500/10' : 'bg-blue-50 border-blue-200 hover:bg-blue-100')
+              : (isDark ? 'opacity-50 cursor-not-allowed border-white/10 text-slate-600' : 'opacity-50 cursor-not-allowed border-slate-200 text-slate-400')
               }`}
           >
             <div className={`p-1.5 rounded-lg ${explanation ? 'bg-blue-500/10 text-blue-400' : 'text-slate-600'}`}>

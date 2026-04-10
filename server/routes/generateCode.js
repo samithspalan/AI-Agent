@@ -1,11 +1,16 @@
 const express = require('express');
 const router = express.Router();
+const Joi = require('joi');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Helper for Groq (Streaming)
+const schema = Joi.object({
+  description: Joi.string().max(1000).required(),
+  language: Joi.string().alphanum().max(50).required(),
+  context: Joi.string().max(2000).allow('')
+});
+
 const streamGroqAI = async (prompt, res) => {
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -21,16 +26,12 @@ const streamGroqAI = async (prompt, res) => {
   });
 
   if (!response.ok) {
-    if (response.status === 429) {
-      throw { type: 'rate_limit', message: 'Groq Rate Limit Reached' };
-    }
-    const error = await response.json();
-    throw new Error(`Groq Fail: ${error.error?.message || response.statusText}`);
+    throw new Error(`Groq HTTP Error: ${response.status}`);
   }
 
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
-  let fullGeneratedCode = "";
+  let fullCode = "";
   
   while (true) {
     const { value, done } = await reader.read();
@@ -48,36 +49,31 @@ const streamGroqAI = async (prompt, res) => {
           const data = JSON.parse(dataStr);
           const chunkText = data.choices[0]?.delta?.content || '';
           if (chunkText) {
-            fullGeneratedCode += chunkText;
+            fullCode += chunkText;
             res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
           }
-        } catch (e) {
-          // Ignore partial
-        }
+        } catch (e) {}
       }
     }
   }
-  return fullGeneratedCode;
+  return fullCode;
 };
 
-// Helper for Gemini (Streaming)
 const streamGeminiAI = async (prompt, res) => {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
   const result = await model.generateContentStream(prompt);
-  let fullGeneratedCode = "";
+  let fullCode = "";
 
   for await (const chunk of result.stream) {
     const chunkText = chunk.text();
-    fullGeneratedCode += chunkText;
+    fullCode += chunkText;
     res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
   }
-  return fullGeneratedCode;
+  return fullCode;
 };
 
-// Helper for Explanation (Single Shot)
 const getExplanation = async (code) => {
-  const prompt = `In 2-3 simple sentences explain what this code does: ${code}`;
-  
+  const prompt = `Explain this code in 2-3 sentences: ${code}`;
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -86,73 +82,50 @@ const getExplanation = async (code) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
+        model: "llama-3.3-70b-versatile",
         messages: [{ role: "user", content: prompt }]
       })
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      return data.choices[0].message.content;
-    }
-    
-    // Fallback to Gemini if Groq fails
+    if (!response.ok) throw new Error("Groq Fail");
+    const data = await response.json();
+    return data.choices[0].message.content;
+  } catch (err) {
+    console.warn("⚠️ Groq Explanation Failed, falling back to Gemini.");
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
     const result = await model.generateContent(prompt);
     return result.response.text();
-  } catch (err) {
-    console.error("Explanation failed:", err.message);
-    return "Code analysis complete.";
   }
 };
 
 router.post('/', async (req, res) => {
-  const { description, language, context } = req.body;
+  const { error, value } = schema.validate(req.body);
+  if (error) return res.status(400).json({ error: error.details[0].message });
 
-  if (!description) {
-    return res.status(400).json({ error: 'Description is required' });
-  }
+  const { description, language, context } = value;
 
-  const codePrompt = `You are an expert ${language} developer. Generate clean, highly readable, and production-ready ${language} code for the following requirement: ${description}. 
+  const codePrompt = `Generate clean, idiomatic ${language} code for: ${description}. 
+Context: ${context || 'None'}. Return ONLY raw code, no markdown fences.`;
 
-Guidelines:
-- Prioritize clear variable names and standard idiomatic patterns.
-- Avoid obscure bitwise tricks or overly complex one-liners (unless specifically requested).
-- Do NOT include any code comments (unless specifically requested).
-- Ensure the code is accessible to developers of all levels.
-- Additional context: ${context || 'None'}.
-
-Return only the code, no markdown fences, no explanation before or after.`;
-
-  // Set headers for streaming response
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
   try {
     let generatedCode = "";
-    console.log(`⚡ [Code Generator] Generating ${language} code via Groq...`);
-    
     try {
       generatedCode = await streamGroqAI(codePrompt, res);
-    } catch (error) {
-      if (error.type === 'rate_limit') {
-        console.warn("⚠️ Groq Rate Limit (429). Falling back to Gemini...");
-        generatedCode = await streamGeminiAI(codePrompt, res);
-      } else {
-        throw error;
-      }
+    } catch (err) {
+      console.warn("⚠️ Groq Stream Failed, falling back to Gemini.");
+      generatedCode = await streamGeminiAI(codePrompt, res);
     }
-
-    console.log("✅ Code Generation Complete. Fetching explanation...");
     
-    // Fetch explanation and send as a separate data packet
     const explanation = await getExplanation(generatedCode);
     res.write(`data: ${JSON.stringify({ explanation })}\n\n`);
 
   } catch (error) {
     console.error("❌ Generation Error:", error.message);
-    res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
+    res.write(`data: ${JSON.stringify({ error: "Service temporarily unavailable" })}\n\n`);
   } finally {
     res.write('data: [DONE]\n\n');
     res.end();
