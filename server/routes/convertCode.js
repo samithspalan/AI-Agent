@@ -59,7 +59,7 @@ const streamGroqAI = async (prompt, res) => {
 
 // Helper for Gemini (Streaming)
 const streamGeminiAI = async (prompt, res) => {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
   const result = await model.generateContentStream(prompt);
 
   for await (const chunk of result.stream) {

@@ -97,7 +97,7 @@ const callGroqAI = async (prompt) => {
 
 const callGeminiAI = async (prompt) => {
   console.log("📡 [Fallback] Attempting with Gemini...");
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
   const result = await model.generateContent(prompt);
   return result.response.text();
 };

@@ -13,13 +13,23 @@ const schema = Joi.object({
 // --- Autonomous Tool Handlers ---
 
 const githubFetch = async (endpoint) => {
-  const response = await fetch(`https://api.github.com${endpoint}`, {
-    headers: {
-      'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
+  const makeRequest = async (useToken) => {
+    const headers = {
       'Accept': 'application/vnd.github+json',
       'User-Agent': 'CodeSage-Agent'
+    };
+    if (useToken && process.env.GITHUB_TOKEN) {
+      headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
     }
-  });
+    return await fetch(`https://api.github.com${endpoint}`, { headers });
+  };
+
+  let response = await makeRequest(true);
+  if (response.status === 401 && process.env.GITHUB_TOKEN) {
+    console.warn("⚠️ GitHub Token invalid (401) in githubFetch. Retrying without token...");
+    response = await makeRequest(false);
+  }
+
   if (response.status === 404) return { error: "File not found" };
   if (!response.ok) throw new Error(`GitHub API Error: ${response.status}`);
   const data = await response.json();
@@ -131,7 +141,7 @@ const callGroqAgent = async (messages) => {
 };
 
 const callGeminiFallback = async (prompt) => {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
   const result = await model.generateContent(prompt);
   return result.response.text();
 };
@@ -144,13 +154,23 @@ router.post('/', async (req, res) => {
 
   try {
     // 1. Search GitHub API for candidates
-    const ghResp = await fetch(`https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&order=desc&per_page=5`, {
+    let ghResp = await fetch(`https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&order=desc&per_page=5`, {
       headers: {
         'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
         'Accept': 'application/vnd.github+json',
         'User-Agent': 'CodeSage-Agent'
       }
     });
+
+    if (ghResp.status === 401 && process.env.GITHUB_TOKEN) {
+      console.warn("⚠️ GitHub Token invalid (401) in repository search. Retrying without token...");
+      ghResp = await fetch(`https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&order=desc&per_page=5`, {
+        headers: {
+          'Accept': 'application/vnd.github+json',
+          'User-Agent': 'CodeSage-Agent'
+        }
+      });
+    }
 
     if (!ghResp.ok) throw new Error("GitHub Search API Failed");
     const ghData = await ghResp.json();

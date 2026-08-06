@@ -60,7 +60,7 @@ const streamGroqAI = async (prompt, res) => {
 };
 
 const streamGeminiAI = async (prompt, res) => {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
   const result = await model.generateContentStream(prompt);
   let fullCode = "";
 
@@ -92,7 +92,7 @@ const getExplanation = async (code) => {
     return data.choices[0].message.content;
   } catch (err) {
     console.warn("⚠️ Groq Explanation Failed, falling back to Gemini.");
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
     const result = await model.generateContent(prompt);
     return result.response.text();
   }

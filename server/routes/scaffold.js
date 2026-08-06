@@ -129,7 +129,7 @@ YOUR MISSION:
     } catch (e) {
       console.warn("Groq failed, using Gemini:", e.message);
       try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+        const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
         const fallbackData = await model.generateContent(prompt);
         setupCommands = fallbackData.response.text();
       } catch (geminiErr) {

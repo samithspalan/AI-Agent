@@ -31,7 +31,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'https://ai-agent-1-r12b.onrender.com',
+  origin: [
+    process.env.CLIENT_URL,
+    'https://ai-agent-1-r12b.onrender.com',
+    'http://localhost:5173'
+  ].filter(Boolean),
   credentials: true
 }));
 app.use(express.json());
